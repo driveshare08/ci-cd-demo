@@ -1,1 +1,1 @@
-Trigger new workflow test
+Trigger new workflow test.
