@@ -1,14 +1,53 @@
-terraform {
-  required_version = ">= 1.0"
+###############################
+# Resource Group
+###############################
+resource "azurerm_resource_group" "rg" {
+  name     = "ci-cd-demo-rg"
+  location = "UK South"
+}
 
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
-    }
+###############################
+# Azure Container Registry
+###############################
+resource "azurerm_container_registry" "acr" {
+  name                = "cicddemoacr"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  sku                 = "Basic"
+  admin_enabled       = true
+}
+
+###############################
+# AKS Cluster
+###############################
+resource "azurerm_kubernetes_cluster" "aks" {
+  name                = "ci-cd-demo-aks"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  dns_prefix          = "ci-cd-demo-aks"
+
+  default_node_pool {
+    name       = "nodepool1"
+    node_count = 1
+    vm_size    = "Standard_B2s"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  role_based_access_control_enabled = true
+
+  network_profile {
+    network_plugin = "azure"
   }
 }
 
-provider "azurerm" {
-  features {}
+###############################
+# Allow AKS to Pull from ACR
+###############################
+resource "azurerm_role_assignment" "aks_acr" {
+  principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
+  role_definition_name = "AcrPull"
+  scope                = azurerm_container_registry.acr.id
 }
