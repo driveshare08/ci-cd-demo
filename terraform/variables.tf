@@ -1,5 +1,5 @@
 variable "location" {
   description = "Azure region"
   type        = string
-  default     = "UK South"
+  default     = "UK West"
 }
