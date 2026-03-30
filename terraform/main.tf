@@ -3,7 +3,7 @@
 ###############################
 resource "azurerm_resource_group" "rg" {
   name     = "ci-cd-demo-rg"
-  location = "UK South"
+  location = "ukwest"
 }
 
 ###############################
@@ -29,7 +29,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   default_node_pool {
     name       = "nodepool1"
     node_count = 1
-    vm_size    = "Standard_B2s"
+    vm_size    = "Standard_D2s_v6"
   }
 
   identity {
